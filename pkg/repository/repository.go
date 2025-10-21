@@ -2,6 +2,8 @@ package repository
 
 import (
 	"rest/models"
+
+	"gorm.io/gorm"
 )
 
 type Authorization interface {
@@ -22,7 +24,7 @@ type Repository struct {
 	Book
 }
 
-func NewRepository(db any) *Repository {
+func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
 		Book:          NewBookPostgres(db),
