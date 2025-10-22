@@ -7,8 +7,8 @@ import (
 )
 
 type Authorization interface {
-	CreateUser(user models.User) (int, error)
-	GetUser(username, password string) /* return user, err */
+	CreateUser(user models.User) (uint, error)
+	GetUser(username string) (models.User, error)
 }
 
 type Book interface {
