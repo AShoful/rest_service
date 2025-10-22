@@ -2,18 +2,20 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"log"
+	"os"
 	"rest/models"
 	"rest/pkg/repository"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	salt       = "hjqrhjqw124617ajfhajs"
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
-	tokenTTL   = 12 * time.Hour
+	tokenTTL = 12 * time.Hour
 )
 
 type AuthService struct {
@@ -23,6 +25,20 @@ type AuthService struct {
 type tokenClaims struct {
 	jwt.RegisteredClaims
 	UserID uint `json:"user_id"`
+}
+
+var jwtSecret []byte
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found (ok in prod)")
+	}
+
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET is not set in environment variables")
+	}
+	jwtSecret = []byte(secret)
 }
 
 func NewAuthService(repo repository.Authorization) *AuthService {
@@ -36,6 +52,7 @@ func (s *AuthService) CreateUser(user models.User) (uint, error) {
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
+
 	user, err := s.repo.GetUser(username)
 	if err != nil {
 		return "", err
@@ -53,7 +70,34 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		UserID: user.ID,
 	})
 
-	return token.SignedString([]byte(signingKey))
+	return token.SignedString([]byte(jwtSecret))
+}
+
+func (s *AuthService) ParseToken(tokenString string) (uint, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Защита: проверка метода подписи
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(jwtSecret), nil // s.secret = JWT_SECRET
+	})
+
+	if err != nil || !token.Valid {
+		return 0, fmt.Errorf("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, fmt.Errorf("cannot parse claims")
+	}
+
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return 0, fmt.Errorf("user_id not found in token")
+	}
+
+	return uint(userIDFloat), nil
 }
 
 func generatePasswordHash(password string) (string, error) {

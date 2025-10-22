@@ -13,6 +13,7 @@ type Service struct {
 type Authorization interface {
 	CreateUser(user models.User) (uint, error)
 	GenerateToken(username, password string) (string, error)
+	ParseToken(token string) (uint, error)
 }
 
 type Book interface {
