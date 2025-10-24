@@ -12,11 +12,11 @@ type Authorization interface {
 }
 
 type Book interface {
-	Create(userId int, book models.Book) /*(int, error)*/
-	GetAll(userId int)                   /*([]models.Book, error)*/
-	GetById(userId, bookId int)          /*(models.Book, error)*/
-	Delete(userId, bookId int) error
-	Update(userId, bookId int, input models.Book) error
+	Create(book models.Book) (uint, error)
+	GetAll() ([]models.Book, error)
+	GetById(ookId uint) (models.Book, error)
+	Delete(userId uint, bookId uint) error
+	Update(userId, bookId uint, input models.UpdateBook) error
 }
 
 type Repository struct {

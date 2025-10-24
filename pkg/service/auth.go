@@ -80,7 +80,7 @@ func (s *AuthService) ParseToken(tokenString string) (uint, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(jwtSecret), nil // s.secret = JWT_SECRET
+		return []byte(jwtSecret), nil
 	})
 
 	if err != nil || !token.Valid {

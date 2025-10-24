@@ -17,15 +17,16 @@ type Authorization interface {
 }
 
 type Book interface {
-	Create(userId int, book models.Book) (int, error)
-	GetAll(userId int) ([]models.Book, error)
-	GetById(userId, bookId int) (models.Book, error)
-	Delete(userId, bookId int) error
-	Update(userId, bookId int, input models.Book) error
+	Create(book models.Book) (uint, error)
+	GetAll() ([]models.Book, error)
+	GetById(bookId uint) (models.Book, error)
+	Delete(userId uint, bookId uint) error
+	Update(userId, bookId uint, book models.UpdateBook) error
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		Book:          NewBookService(repos.Book),
 	}
 }
