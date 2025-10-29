@@ -32,13 +32,8 @@ func (h *Handler) signUp(c *gin.Context) {
 
 }
 
-type signInInput struct {
-	Username string `json:"username" gorm:"unique" validate:"required,min=3"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
 func (h *Handler) signIn(c *gin.Context) {
-	var user signInInput
+	var user models.SignInInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})

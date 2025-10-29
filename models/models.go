@@ -7,6 +7,11 @@ type User struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+type SignInInput struct {
+	Username string `json:"username" gorm:"unique" validate:"required,min=3"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
 type Book struct {
 	ID     uint   `json:"id" gorm:"primaryKey"`
 	Title  string `json:"title" gorm:"unique" validate:"required,min=4"`

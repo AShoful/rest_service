@@ -75,7 +75,6 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 
 func (s *AuthService) ParseToken(tokenString string) (uint, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Защита: проверка метода подписи
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

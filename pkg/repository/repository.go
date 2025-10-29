@@ -14,7 +14,7 @@ type Authorization interface {
 type Book interface {
 	Create(book models.Book) (uint, error)
 	GetAll() ([]models.Book, error)
-	GetById(ookId uint) (models.Book, error)
+	GetById(bookId uint) (models.Book, error)
 	Delete(userId uint, bookId uint) error
 	Update(userId, bookId uint, input models.UpdateBook) error
 }

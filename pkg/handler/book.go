@@ -23,7 +23,7 @@ func (h *Handler) createBook(c *gin.Context) {
 		return
 	}
 
-	userId, err := getUserId(c)
+	userId, err := UserIDFromContext(c)
 	if err != nil {
 		book.ID = 0
 		return
@@ -78,7 +78,7 @@ func (h *Handler) getBookById(c *gin.Context) {
 
 func (h *Handler) updateBook(c *gin.Context) {
 	var book models.UpdateBook
-	userId, _ := getUserId(c)
+	userId, _ := UserIDFromContext(c)
 
 	idStr := c.Param("id")
 	bookId, err := strconv.Atoi(idStr)
@@ -108,7 +108,7 @@ func (h *Handler) updateBook(c *gin.Context) {
 
 func (h *Handler) deleteBook(c *gin.Context) {
 
-	userId, _ := getUserId(c)
+	userId, _ := UserIDFromContext(c)
 
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -127,10 +127,10 @@ func (h *Handler) deleteBook(c *gin.Context) {
 
 }
 
-func getUserId(c *gin.Context) (uint, error) {
+func UserIDFromContext(c *gin.Context) (uint, error) {
 	id, ok := c.Get(userCtx)
 	if !ok {
-		return 0, errors.New("user id not found")
+		return 0, errors.New("user_id not found in context")
 	}
 
 	idUint, ok := id.(uint)
