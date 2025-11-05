@@ -19,10 +19,14 @@ The project includes:
 ## Repository Structure
 
 ```bash
-├── server/      # REST API server implementation
-├── pkg/         # Packages: handler, models, repository, etc.
+├── server.go
+├── cmd/            # main.go (entry point)
+├── models/         # models.go 
+├── configs/        # config.yml
+├── pkg/            # Packages: handler, repository, service.
 ├── go.mod
 ├── go.sum
+├── .env
 └── .gitignore
 ````
 
