@@ -74,6 +74,18 @@ The server will start and listen for HTTP requests on **port 8080** (by default)
 
 ---
 
+## Running the Ргоху Server
+
+From the root of the repository:
+
+```bash
+go run ./cmd/proxy/proxy.go
+```
+The proxy server will work at the address 
+http://127.0.0.1:5050 → http://127.0.0.1:8080
+and fill the header with a token after successful authorization.
+---
+
 ## API Endpoints
 
 ### Authentication

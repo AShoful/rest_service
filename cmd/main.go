@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 	"os"
-	"rest"
 	"rest/pkg/handler"
 	"rest/pkg/repository"
 	"rest/pkg/service"
+	"rest/rest"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
