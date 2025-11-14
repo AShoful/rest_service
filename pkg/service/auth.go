@@ -14,12 +14,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	tokenTTL = 12 * time.Hour
-)
+const tokenTTL = 12 * time.Hour
 
 type AuthService struct {
-	repo repository.Authorization
+	repo      repository.Authorization
+	jwtSecret []byte
 }
 
 type tokenClaims struct {
@@ -27,22 +26,22 @@ type tokenClaims struct {
 	UserID uint `json:"user_id"`
 }
 
-var jwtSecret []byte
-
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found (ok in prod)")
 	}
+}
 
+func NewAuthService(repo repository.Authorization) *AuthService {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		log.Fatal("JWT_SECRET is not set in environment variables")
 	}
-	jwtSecret = []byte(secret)
-}
 
-func NewAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+	return &AuthService{
+		repo:      repo,
+		jwtSecret: []byte(secret),
+	}
 }
 
 func (s *AuthService) CreateUser(user models.User) (uint, error) {
@@ -52,7 +51,6 @@ func (s *AuthService) CreateUser(user models.User) (uint, error) {
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
-
 	user, err := s.repo.GetUser(username)
 	if err != nil {
 		return "", err
@@ -70,7 +68,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		UserID: user.ID,
 	})
 
-	return token.SignedString([]byte(jwtSecret))
+	return token.SignedString(s.jwtSecret)
 }
 
 func (s *AuthService) ParseToken(tokenString string) (uint, error) {
@@ -78,8 +76,7 @@ func (s *AuthService) ParseToken(tokenString string) (uint, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
-		return []byte(jwtSecret), nil
+		return s.jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
