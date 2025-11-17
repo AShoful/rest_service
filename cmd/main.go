@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
 	"rest/pkg/handler"
 	"rest/pkg/repository"
 	"rest/pkg/service"
 	"rest/rest"
+	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -37,10 +41,27 @@ func main() {
 
 	srv := new(rest.Server)
 
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		log.Fatalf("error occured while running http server: %s", err.Error())
+	go func() {
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			log.Fatalf("error occurred while running http server: %s", err.Error())
+		}
+	}()
+
+	log.Println("Server started on port", viper.GetString("port"))
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown signal received...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %s", err.Error())
 	}
 
+	log.Println("Server exited gracefully")
 }
 
 func initConfig() error {
