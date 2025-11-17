@@ -2,10 +2,15 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 const (
@@ -16,9 +21,35 @@ const (
 var authToken string
 
 func main() {
-	http.HandleFunc("/", proxyHandler)
-	log.Printf("The proxy is running on http://%s → %s", proxyAddr, apiServer)
-	log.Fatal(http.ListenAndServe(proxyAddr, nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", proxyHandler)
+
+	srv := &http.Server{
+		Addr:    proxyAddr,
+		Handler: mux,
+	}
+
+	go func() {
+		log.Printf("Proxy is running on http://%s → %s", proxyAddr, apiServer)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %s", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	log.Println("Shutting down proxy server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %s", err)
+	}
+
+	log.Println("Proxy stopped gracefully.")
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
