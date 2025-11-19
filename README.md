@@ -120,3 +120,15 @@ The service uses **environment variables** for configuration:
 | `DB_NAME`     | Database name     | `go_crud_db` |
 | `SERVER_PORT` | HTTP server port  | `8080`       |
 
+
+---
+
+## Running the unit tests
+
+From the root of the repository:
+
+```bash
+  go test ./pkg/handler -coverprofile=handler.out
+  go tool cover -func=handler.out
+```
+
