@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"rest"
 	"rest/pkg/handler"
 	"rest/pkg/repository"
 	"rest/pkg/service"
-	"rest/rest"
 	"syscall"
 	"time"
 

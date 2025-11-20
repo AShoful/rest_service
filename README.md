@@ -128,7 +128,6 @@ The service uses **environment variables** for configuration:
 From the root of the repository:
 
 ```bash
-  go test ./pkg/handler -coverprofile=handler.out
-  go tool cover -func=handler.out
+  ./run_tests.sh
 ```
 
